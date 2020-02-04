@@ -1,0 +1,46 @@
+{
+    "name": "dcreverse",
+    "version": "1.0.0",
+    "description": "Docker Compose Reverse Engineer",
+    "main": "src/index.ts",
+    "repository": "http://nsfilho.github.io/dcreverse/",
+    "author": "Nelio Santos",
+    "license": "MIT",
+    "scripts": {
+        "start": "ts-node src/index.ts",
+        "build": "tsc"
+    },
+    "dependencies": {
+        "@types/node": "^13.7.0",
+        "axios": "^0.19.2",
+        "commander": "^4.1.1",
+        "eslint": "^6.8.0",
+        "nodemon": "^2.0.2",
+        "prettier": "^1.19.1",
+        "ts-node": "^8.6.2",
+        "typescript": "^3.7.5"
+    },
+    "devDependencies": {
+        "@typescript-eslint/eslint-plugin": "^2.19.0",
+        "@typescript-eslint/parser": "^2.19.0",
+        "eslint-config-airbnb-base": "^14.0.0",
+        "eslint-plugin-import": "^2.18.2",
+        "husky": "^4.2.1",
+        "lint-staged": "^10.0.7"
+    },
+    "husky": {
+        "hooks": {
+            "pre-commit": "yarn build && lint-staged",
+            "post-update": "yarn deploy"
+        }
+    },
+    "lint-staged": {
+        "**/*.+(css|less|scss|md)": [
+            "prettier --write"
+        ],
+        "**/*.+(js|jsx|ts|tsx)": [
+            "eslint --fix",
+            "prettier --write"
+        ]
+    }
+}
