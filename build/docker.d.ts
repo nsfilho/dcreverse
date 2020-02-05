@@ -1,6 +1,3 @@
-import axios from 'axios';
-import util from 'util';
-
 export interface ServiceConfig {
     File: {
         Name: string;
@@ -16,7 +13,6 @@ export interface ServiceNetwork {
     Aliases: string[];
     Link?: Network;
 }
-
 export interface ServiceMount {
     Type: string;
     Source: string;
@@ -30,7 +26,6 @@ export interface ServiceMount {
         };
     };
 }
-
 export interface ServiceSpec {
     Name: string;
     Labels: {
@@ -52,7 +47,7 @@ export interface ServiceSpec {
             Configs: ServiceConfig[];
             Isolation: string;
         };
-        Resources: {}; // Pegar container com este conteúdo para aferir
+        Resources: {};
         Placement: {
             Platforms: {
                 Architecture: string;
@@ -72,7 +67,6 @@ export interface ServiceSpec {
         Mode: string;
     };
 }
-
 export interface Service {
     ID: string;
     Version: {
@@ -92,7 +86,6 @@ export interface Service {
         }[];
     };
 }
-
 export interface Network {
     Name: string;
     Id: string;
@@ -123,13 +116,6 @@ export interface Network {
         [index: string]: string;
     };
 }
-
-export const getAllServices = async (dockerUrl: string): Promise<Service[]> => {
-    const result = await axios.get<Service[]>(`${dockerUrl}/services`);
-    return result.data;
-};
-
-export const getAllNetworks = async (dockerUrl: string): Promise<Network[]> => {
-    const result = await axios.get<Network[]>(`${dockerUrl}/networks`);
-    return result.data;
-};
+export declare const getAllServices: (dockerUrl: string) => Promise<Service[]>;
+export declare const getAllNetworks: (dockerUrl: string) => Promise<Network[]>;
+//# sourceMappingURL=docker.d.ts.map

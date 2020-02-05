@@ -4,6 +4,10 @@
 
 ### Node ###
 # Logs
+.yarn
+.yarnrc.yml
+.pnp.js
+yarn.lock
 logs
 *.log
 npm-debug.log*

@@ -2,6 +2,7 @@
     "name": "dcreverse",
     "version": "1.0.0",
     "description": "Docker Compose Reverse Engineer",
+    "bin": "build/index.js",
     "main": "src/index.ts",
     "repository": "http://nsfilho.github.io/dcreverse/",
     "author": "Nelio Santos",
