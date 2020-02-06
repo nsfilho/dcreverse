@@ -9,6 +9,7 @@
     "license": "MIT",
     "scripts": {
         "start": "ts-node src/index.ts",
+        "lint": "eslint src/**/*.ts",
         "build": "tsc"
     },
     "dependencies": {
@@ -25,7 +26,10 @@
         "@typescript-eslint/eslint-plugin": "^2.19.0",
         "@typescript-eslint/parser": "^2.19.0",
         "eslint-config-airbnb-base": "^14.0.0",
+        "eslint-config-prettier": "^6.10.0",
+        "eslint-import-resolver-typescript": "^2.0.0",
         "eslint-plugin-import": "^2.18.2",
+        "eslint-plugin-prettier": "^3.1.2",
         "husky": "^4.2.1",
         "lint-staged": "^10.0.7"
     },

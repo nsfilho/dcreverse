@@ -1,28 +1,27 @@
 import path from 'path';
 import util from 'util';
+import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import {
     getAllServices,
-    Service,
     getAllNetworks,
-    Network,
+    Service,
     ServiceMount,
     ServiceNetwork,
     ServiceConfig
 } from './docker';
-import { mkdirSync, existsSync } from 'fs';
 import {
-    template_start,
-    template_service_line,
-    template_image_line,
-    template_args_line,
-    template_env_line,
-    template_service_volume,
-    template_service_network,
-    template_service_config,
-    template_volumes_def,
-    template_networks_def,
-    template_service_labels,
-    template_service_deploy_labels
+    templateStart,
+    templateServiceLine,
+    templateImageLine,
+    templateArgsLine,
+    templateEnvLine,
+    templateServiceVolume,
+    templateServiceNetwork,
+    templateServiceConfig,
+    templateVolumesDef,
+    templateNetworksDef,
+    templateServiceLabels,
+    templateServiceDeployLabels
 } from './template';
 
 export interface Stack {
@@ -48,13 +47,13 @@ export const generateDirs = (stacks: Stack[], outputDir: string): boolean => {
 
 export const generateVolumes = (volumes: ServiceMount[]): string[] => {
     const result: string[] = [`volumes:`];
-    volumes.forEach(vol => result.push(...template_volumes_def(vol)));
+    volumes.forEach(vol => result.push(...templateVolumesDef(vol)));
     return result;
 };
 
 export const generateNetworks = (networks: ServiceNetwork[]): string[] => {
     const result: string[] = [`networks:`];
-    networks.forEach(net => result.push(...template_networks_def(net)));
+    networks.forEach(net => result.push(...templateNetworksDef(net)));
     return result;
 };
 
@@ -64,7 +63,11 @@ export const generateConfigs = (configs: ServiceConfig[]): string[] => {
     return result;
 };
 
-export const generateComposes = (stacks: Stack[], outputDir: string, verbose: boolean = false) => {
+export const generateComposes = (
+    stacks: Stack[],
+    outputDir: string,
+    verbose = false
+): void => {
     stacks.forEach(stack => {
         // Path Definitions
         const basePath = path.join(outputDir, stack.namespace);
@@ -77,31 +80,36 @@ export const generateComposes = (stacks: Stack[], outputDir: string, verbose: bo
         const configs: ServiceConfig[] = [];
 
         // Starting buffers
-        dcyml.push(template_start(stack));
+        dcyml.push(templateStart(stack));
 
-        const addVolume = (volume: ServiceMount) => {
-            if (volumes.findIndex(v => v.Source === volume.Source) === -1) volumes.push(volume);
-            dcyml.push(template_service_volume(volume));
+        const addVolume = (volume: ServiceMount): void => {
+            if (volumes.findIndex(v => v.Source === volume.Source) === -1)
+                volumes.push(volume);
+            dcyml.push(templateServiceVolume(volume));
         };
 
-        const addNetwork = (net: ServiceNetwork) => {
-            if (networks.findIndex(n => n.Target === net.Target) === -1) networks.push(net);
-            if (net.Link === undefined) throw Error(`Network ${net.Target} not found`);
-            dcyml.push(...template_service_network(net));
+        const addNetwork = (net: ServiceNetwork): void => {
+            if (networks.findIndex(n => n.Target === net.Target) === -1)
+                networks.push(net);
+            if (net.Link === undefined)
+                throw Error(`Network ${net.Target} not found`);
+            dcyml.push(...templateServiceNetwork(net));
         };
 
-        const addConfig = (config: ServiceConfig) => {
-            if (configs.findIndex(c => c.ConfigID === config.ConfigID) === -1) configs.push(config);
-            dcyml.push(...template_service_config(config));
+        const addConfig = (config: ServiceConfig): void => {
+            if (configs.findIndex(c => c.ConfigID === config.ConfigID) === -1)
+                configs.push(config);
+            dcyml.push(...templateServiceConfig(config));
         };
 
         stack.services.forEach(service => {
             const task = service.Spec.TaskTemplate;
             const spec = task.ContainerSpec;
-            dcyml.push(template_service_line(service));
-            dcyml.push(template_image_line(service));
-            spec.Args !== undefined && spec.Args.length > 0 && dcyml.push(template_args_line(spec.Args));
-            dcyml.push(...template_env_line(spec.Env));
+            dcyml.push(templateServiceLine(service));
+            dcyml.push(templateImageLine(service));
+            if (spec.Args !== undefined && spec.Args.length > 0)
+                dcyml.push(templateArgsLine(spec.Args));
+            dcyml.push(...templateEnvLine(spec.Env));
 
             if (spec.Mounts !== undefined) {
                 dcyml.push(`    volumes:`);
@@ -120,16 +128,23 @@ export const generateComposes = (stacks: Stack[], outputDir: string, verbose: bo
 
             if (spec.Labels !== undefined) {
                 const result = Object.entries(spec.Labels)
-                    .filter(([k, v]) => k !== 'com.docker.stack.namespace')
-                    .map(([k, v]) => template_service_labels(k, v));
+                    .filter(([k]) => k !== 'com.docker.stack.namespace')
+                    .map(([k, v]) => templateServiceLabels(k, v));
                 if (result.length > 0) dcyml.push(`    labels:`, ...result);
             }
 
             if (service.Spec.Labels !== undefined) {
                 const result = Object.entries(service.Spec.Labels)
-                    .filter(([k, v]) => !['com.docker.stack.namespace', 'com.docker.stack.image'].includes(k))
-                    .map(([k, v]) => template_service_deploy_labels(k, v));
-                if (result.length > 0) dcyml.push(`    deploy:`, `      labels:`, ...result);
+                    .filter(
+                        ([k]) =>
+                            ![
+                                'com.docker.stack.namespace',
+                                'com.docker.stack.image'
+                            ].includes(k)
+                    )
+                    .map(([k, v]) => templateServiceDeployLabels(k, v));
+                if (result.length > 0)
+                    dcyml.push(`    deploy:`, `      labels:`, ...result);
             }
 
             if (verbose)
@@ -148,20 +163,18 @@ export const generateComposes = (stacks: Stack[], outputDir: string, verbose: bo
                             service.Spec.TaskTemplate.Networks
                         )
                         .split('\n')
-                        .map(s => '# ' + s)
+                        .map(s => `# ${s}`)
                 );
-            dcyml.push('\n\n');
+            dcyml.push('\n');
         });
 
-        const dcymlFinal =
-            dcyml.join('\n') +
-            '\n' +
-            generateVolumes(volumes).join('\n') +
-            '\n' +
-            generateNetworks(networks).join('\n') +
-            '\n' +
-            generateConfigs(configs).join('\n');
-        console.log(dcymlFinal + '\n\n');
+        const dcymlFinal = `${dcyml.join('\n')}\n${generateVolumes(
+            volumes
+        ).join('\n')}\n${generateNetworks(networks).join(
+            '\n'
+        )}\n${generateConfigs(configs).join('\n')}`;
+        console.log('Writing', composePath);
+        writeFileSync(composePath, dcymlFinal);
     });
 };
 
@@ -169,8 +182,8 @@ export const dumping = async (
     dockerUrl: string,
     outputDir: string,
     namespaceFilter?: string,
-    verbose: boolean = false
-) => {
+    verbose = false
+): Promise<void> => {
     const allNetworks = await getAllNetworks(dockerUrl);
     const allServices = await getAllServices(dockerUrl);
 
@@ -179,7 +192,7 @@ export const dumping = async (
         .reduce<Stack[]>((acc, service) => {
             const namespace = service.Spec.Labels['com.docker.stack.namespace'];
             if (namespace !== undefined) {
-                const addStack = (content: Stack) => {
+                const addStack = (content: Stack): Stack => {
                     acc.push(content);
                     return content;
                 };
@@ -190,13 +203,18 @@ export const dumping = async (
                         services: []
                     });
                 service.Spec.TaskTemplate.Networks.forEach(net => {
+                    // eslint-disable-next-line no-param-reassign
                     net.Link = allNetworks.find(n => net.Target === n.Id);
                 });
                 stack.services.push(service);
             }
             return acc;
         }, [])
-        .filter(s => namespaceFilter === undefined || s.namespace === namespaceFilter);
+        .filter(
+            s =>
+                namespaceFilter === undefined || s.namespace === namespaceFilter
+        );
 
-    if (generateDirs(stacks, outputDir)) generateComposes(stacks, outputDir, verbose);
+    if (generateDirs(stacks, outputDir))
+        generateComposes(stacks, outputDir, verbose);
 };

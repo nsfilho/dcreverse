@@ -13,4 +13,5 @@ export declare const template_service_config: (config: ServiceConfig) => string[
 export declare const template_volumes_def: (volume: ServiceMount) => string[];
 export declare const template_networks_def: (net: ServiceNetwork) => string[];
 export declare const template_service_labels: (k: string, v: string) => string;
+export declare const template_service_deploy_labels: (k: string, v: string) => string;
 //# sourceMappingURL=template.d.ts.map

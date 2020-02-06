@@ -11,7 +11,7 @@ commander_1.default
     .option('-d, --docker-url <url>', 'specify a docker url')
     .option('-n, --namespace <namespace>', 'dumping a exclusive namespace')
     .option('-o, --output-dir <directory>', 'dumping all namespaces in a directory')
-    .option('-c, --verbose', 'show more details from collected data from docker');
+    .option('-v, --verbose', 'show more details from collected data from docker');
 commander_1.default
     .command('dump', {
     isDefault: true
