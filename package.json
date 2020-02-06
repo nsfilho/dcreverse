@@ -40,10 +40,10 @@
         }
     },
     "lint-staged": {
-        "**/*.+(css|less|scss|md)": [
+        "src/**/*.+(css|less|scss|md)": [
             "prettier --write"
         ],
-        "**/*.+(js|jsx|ts|tsx)": [
+        "src/**/*.+(js|jsx|ts|tsx)": [
             "eslint --fix",
             "prettier --write"
         ]
