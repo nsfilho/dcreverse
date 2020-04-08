@@ -3,6 +3,11 @@ export interface Stack {
     namespace: string;
     services: Service[];
 }
+/**
+ * Generate dir structure to put docker-compose files
+ *
+ * @returns {boolean} Successful or not
+ */
 export declare const generateDirs: (stacks: Stack[], outputDir: string) => boolean;
 export declare const generateVolumes: (volumes: ServiceMount[]) => string[];
 export declare const generateNetworks: (networks: ServiceNetwork[]) => string[];

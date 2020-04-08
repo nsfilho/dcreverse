@@ -1,6 +1,5 @@
 import path from 'path';
 import util from 'util';
-import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import {
     getAllServices,
     getAllNetworks,
@@ -29,27 +28,6 @@ export interface Stack {
     services: Service[];
 }
 
-/**
- * Generate dir structure to put docker-compose files
- *
- * @returns {boolean} Successful or not
- */
-export const generateDirs = (stacks: Stack[], outputDir: string): boolean => {
-    try {
-        if (!existsSync(outputDir)) {
-            mkdirSync(outputDir);
-        }
-        stacks.forEach(s => {
-            const dirPath = path.join(outputDir, s.namespace);
-            if (!existsSync(dirPath)) mkdirSync(dirPath);
-        });
-    } catch (err) {
-        console.error('Error creating directories:', err);
-        return false;
-    }
-    return true;
-};
-
 export const generateVolumes = (volumes: ServiceMount[]): string[] => {
     const result: string[] = [`volumes:`];
     volumes.forEach(vol => result.push(...templateVolumesDef(vol)));
@@ -68,16 +46,8 @@ export const generateConfigs = (configs: ServiceConfig[]): string[] => {
     return result;
 };
 
-export const generateComposes = (
-    stacks: Stack[],
-    outputDir: string,
-    verbose = false
-): void => {
+export const generateComposes = (stacks: Stack[], verbose = false): void => {
     stacks.forEach(stack => {
-        // Path Definitions
-        const basePath = path.join(outputDir, stack.namespace);
-        const composePath = path.join(basePath, 'docker-compose.yml');
-
         // Buffer definitions
         const dcyml: string[] = [];
         const volumes: ServiceMount[] = [];
@@ -178,15 +148,14 @@ export const generateComposes = (
         ).join('\n')}\n${generateNetworks(networks).join(
             '\n'
         )}\n${generateConfigs(configs).join('\n')}`;
-        console.log('Writing', composePath);
-        writeFileSync(composePath, dcymlFinal);
+        // eslint-disable-next-line
+        console.log(dcymlFinal);
     });
 };
 
 export const dumping = async (
     dockerUrl: string,
-    outputDir: string,
-    namespaceFilter?: string,
+    namespaceFilter: string,
     verbose = false
 ): Promise<void> => {
     const allNetworks = await getAllNetworks(dockerUrl);
@@ -215,11 +184,7 @@ export const dumping = async (
             }
             return acc;
         }, [])
-        .filter(
-            s =>
-                namespaceFilter === undefined || s.namespace === namespaceFilter
-        );
-
-    if (generateDirs(stacks, outputDir))
-        generateComposes(stacks, outputDir, verbose);
+        .filter(s => s.namespace === namespaceFilter);
+    if (verbose) stacks.forEach(s => console.log(`VERBOSE: StackName: ${s}`));
+    generateComposes(stacks, verbose);
 };
