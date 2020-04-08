@@ -3,15 +3,9 @@ export interface Stack {
     namespace: string;
     services: Service[];
 }
-/**
- * Generate dir structure to put docker-compose files
- *
- * @returns {boolean} Successful or not
- */
-export declare const generateDirs: (stacks: Stack[], outputDir: string) => boolean;
 export declare const generateVolumes: (volumes: ServiceMount[]) => string[];
 export declare const generateNetworks: (networks: ServiceNetwork[]) => string[];
 export declare const generateConfigs: (configs: ServiceConfig[]) => string[];
-export declare const generateComposes: (stacks: Stack[], outputDir: string, verbose?: boolean) => void;
-export declare const dumping: (dockerUrl: string, outputDir: string, namespaceFilter?: string | undefined, verbose?: boolean) => Promise<void>;
+export declare const generateComposes: (stacks: Stack[], verbose?: boolean) => void;
+export declare const dumping: (dockerUrl: string, namespaceFilter: string, verbose?: boolean) => Promise<void>;
 //# sourceMappingURL=dumping.d.ts.map
