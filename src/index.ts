@@ -7,10 +7,6 @@ program
     .option('-d, --docker-url <url>', 'specify a docker url')
     .option('-n, --namespace <namespace>', 'dumping a exclusive namespace')
     .option(
-        '-o, --output-dir <directory>',
-        'dumping all namespaces in a directory'
-    )
-    .option(
         '-v, --verbose',
         'show more details from collected data from docker'
     );
@@ -21,9 +17,8 @@ program
     })
     .action(async () => {
         const dockerUrl = program.dockerUrl || 'http://localhost:8999';
-        const outputDir = program.outputDir || 'dumping';
         const { namespace, verbose } = program;
-        await dumping(dockerUrl, outputDir, namespace, verbose);
+        await dumping(dockerUrl, namespace, verbose);
     });
 
 program.parse(process.argv);

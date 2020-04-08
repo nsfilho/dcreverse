@@ -29,6 +29,11 @@ export interface Stack {
     services: Service[];
 }
 
+/**
+ * Generate dir structure to put docker-compose files
+ *
+ * @returns {boolean} Successful or not
+ */
 export const generateDirs = (stacks: Stack[], outputDir: string): boolean => {
     try {
         if (!existsSync(outputDir)) {

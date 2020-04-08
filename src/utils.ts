@@ -1,3 +1,8 @@
+/**
+ * Deduplicate Array
+ *
+ * @returns {string[]} Return a new array without duplicated items.
+ */
 export const uniqueStringArray = (arr: string[]): string[] => {
     const result: string[] = [];
     arr.forEach(item => {
